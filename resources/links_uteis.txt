@@ -1,0 +1,3 @@
+Exemplo de autenticação Django/React https://github.com/dotja/authentication_app_react_django_rest/blob/main/frontend/src/App.js
+
+Exemplo de CSV de react/django https://github.com/mohith563/djreact_csv

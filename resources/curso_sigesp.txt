@@ -1,0 +1,34 @@
+1- Instalaçao miniforge
+    software de instalação de pacotes
+
+2- Instalação de ambiente virtual
+
+Instalação de pacotes
+$ create -n geoenv24 -c conda-forge --strict-channel-priority osmnx jupyterlab fiona richdem pysheds plotly contextily sqlalchemy owslib matplotlib-scalebar pycrs lxml html5lib seaborn xarray xlrd openpyxl python-wget pysal geodatasets pyogrio psycopg2 cartopy pygmt adal
+
+Usando jupyter
+$ jupyter lab
+
+conda update -n base conda
+conda create -n geoenv
+conda activate geoenv
+conda env list
+conda remove -n geoenv2 --all
+
+Registrando kernel:
+conda install ipykernel
+ipython kernel install --user --name=teste
+
+..............................................................
+escala maior -> maior detalhe
+epsg.io (site com crs) --- UTM limite local  4674 > depois polyconic 5880
+inde.gov.br (WMS - imagem  WFS - vetoriais)
+geopandas todas as operações precisam estar no mesmo sistema de coordenadas
+
+grandes distancias fazer por grande circulo e não linha reta
+
+
+curso python gis: https://pythongis.org/
+
+
+

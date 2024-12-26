@@ -1,0 +1,282 @@
+############################### Primeiros Passos ######################################
+
+Para criar um ambiente virtual:
+
+python -m venv venv
+
+Para ativar um ambiente virtual:
+
+venv/Scripts/activate
+
+Para poder usar mysql
+1°
+pip install mysqlclient
+
+
+2° Adicionar o código abaixo na parte DATABASES do seting.py 
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'seu_banco_de_dados',
+        'USER': 'seu_usuario',
+        'PASSWORD': 'sua_senha',
+        'HOST': 'localhost',
+        'PORT': '3306'
+    }
+}
+
+
+3° Para criar as migrações
+
+  python manage.py makemigrations crud
+
+
+4° Para criar as tabelas no banco de dados 
+
+python manage.py migrate
+
+Fonte: https://pythonacademy.com.br/blog/como-conectar-o-django-ao-mysql#configurando-o-django-para-se-conectar-ao-mysql
+
+
+Sobre tipos de campos nos bancos de dados no Django:
+https://docs.djangoproject.com/en/3.1/ref/models/fields/
+
+
+Para ver os pacotes instalados no ambiente virtual:
+pip freeze > requirements.txt
+
+##################################################################################
+
+
+
+###################Criando um projeto de um web app no Djando:###################
+
+django-admin startproject <nome do projeto>
+
+Criando um app dentro do projeto:
+
+python manage.py startapp <nome do app>
+
+Abre o <nome do projeto>/settings.py e em INSTALLED_APPS adicione o novo app:
+
+INSTALLED_APPS = [
+  'nomedoapp.apps.NomedoappConfig',
+  'django.contrib.admn',
+  ...
+]
+
+Depois para setar o Banco de dados em <nome do projeto>/settings.py em DATABASES coloque:
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'seu_banco_de_dados',
+        'USER': 'seu_usuario',
+        'PASSWORD': 'sua_senha',
+        'HOST': 'localhost',
+        'PORT': '3306'
+    }
+}
+
+Criar um modelo em <nome do app>/models.py
+
+Criar os scripts de migração:
+
+python manage.py makemigrations <nome do app>
+
+python manage.py migrate
+
+Criar a view e o template, em <mone do app>/views.py, como por exemplo o template em HTML abaixo:
+
+from django.http import HttpResponse
+from .models import <modelo>
+
+def modelo_list(request):
+  modelo = Modelo.objects.get(pk=1)
+  template = "<html>" \
+    "<body> The first model we create is '%s.'" \
+    "</body>" \
+    "</html> % modelo.atribute
+  return HttpResponse(content=template)  
+
+
+Depois precisamos criar o script url.py dentro de <nome do app> , ou atualizar ele se ja existir e adicionar em urlpatterns:
+
+from django.urls import path
+from . import views
+
+urlpatterns = [ path(route='', view=views.modelo_list, name='modelo_list')]
+
+Depois incluimos o <nome do app> urls.py no <nome do projeto>/urls.py:
+
+from django.contrib import admin
+from django.urls import include, path
+
+urlpatterns = [
+  path('admin/', admin.site.urls),
+  path('<nome do app>/', include('<nome do app>.urls')),
+]
+
+Para testar se está tudo certo podemos colocar no servidor localhost:
+
+python manage.py runserver
+
+Que vai rodar em: http://127.0.0.1:8000/
+
+##################################### Para subir o projeto em um container: ###############################################
+
+Em settings.py precisamos adicionar
+
+ALLOWED_HOSTS = ['*','.us-south.codeengine.appdomain.cloud']
+
+
+Depois precisamos criar o arquivo de requirements.txt usando:
+
+pip install pipreqs
+pipreqs .
+
+Depois criar um Dockerfile e colar o script:
+
+# syntax=docker/dockerfile:1
+FROM python:3
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+WORKDIR /code
+COPY requirements.txt /code/
+RUN pip install -r requirements.txt
+COPY . /code/
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+
+E no terminal para construir o container devemos rodar:
+
+docker build . -t my-django-app:latest && docker run -e PYTHONUNBUFFERED=1 -p  8000:8000 my-django-app
+
+
+
+########################################### Para Cirar um Super User no admin do Django ############################################
+
+python manage.py createsuperuser
+
+
+
+################################################ Django Models #######################################################
+
+Criar classes que serão as tabelas do db
+
+class User(models.Model):
+  first_name = models.CharField(max_lenght=30)
+  last_name = models.ChartField(max_lenght=30)
+  dob = models.DateField()
+
+
+Criar Relação 1 pra 1
+
+class Instructor(models.Model):
+  is_full_time = models.BooleanField()
+  total_learners = models.IntegerField()
+  user = models.OneToOneField(User)
+
+class User(models.Model):
+  first_name = models.CharField(max_lenght=30)
+  last_name = models.ChartField(max_lenght=30)
+  dob = models.DateField()
+
+Criar relação muitos para 1
+
+class Project(models.Model):
+  name = models.CharField(max_lenght=30)
+  grade = models.CharField(max_lenght=30)
+  course = models.ForeignKey(Course)
+
+class Course(models.Model):
+  name = models.CharField(max_lenght=30)
+  description = models.Charfield(max_lenght=30)
+
+Criar relação muitos para muitos
+
+class Course(models.Model):
+  name = models.CharField(max_lenght=30)
+  description = models.Charfield(max_lenght=30)
+  learners = models.ManyToManyField(Learner)
+
+class Learner(models.Model):
+  occupation = models.ChartField(max_lenght=20)
+  social_link = models.URLField
+
+Criar relação muitos para muitos quando existe mais informações no caminho, através de uma tabela intermediaria
+
+class Course(models.Model):
+  name = models.CharField(max_lenght=30)
+  description = models.Charfield(max_lenght=30)
+  learners = models.ManyToManyField(Learner, throught='Enrollment')
+
+class Enrollment(models.Model):
+  course = models.ForeignKey(Course)
+  learner = models.ForeignKey(Learner)
+
+class Learner(models.Model):
+  occupation = models.ChartField(max_lenght=20)
+  social_link = models.URLField  
+
+
+################################################### CRUD #####################################################
+
+Create: Criando o curso Cloud Application em Course e o Projeto ORM relacionado ao curso Cloud Application
+
+course_cloud_app = Course(name="Cloud Application Development with Database",
+                                    description="Develop and deploy application on cloud")
+course_cloud_app.save()
+
+
+project_orm = Project(name="Object-relational mapping project", grade=0.2,
+                         course=course_cloud_app)
+
+
+Read:
+
+courses = Course.objects.all() >>>> equivalente em SQL a: SELECT * FROM Course 
+
+part_time_instructors = Instructor.objects.filter(is_full_time=False)
+
+filtered_instructors = Instructor.objects.exclude(full_time=False).filter(total_learners__gt=30000).filter(first_name__startwith='J')
+
+filtered_instructors = Instructor.objects.filter(full_time=True, total_learners__gt=30000, first_name__startwith='J')
+
+instructor_john = Instructor.objects.get(first_name='John')
+
+Para ler dados relacionados a outras tabelas (como o JOIN no SQL):
+
+courses = Course.objects.filter(instructors__first_name='John')
+
+
+Update:
+
+learner_jonh.dob = date(1985, 3, 16)
+learner_john.save()
+
+project_orm.course = course_python
+project_orm.save()
+
+course_python.learners.add(learner_joe)
+course_python.save()
+
+
+Delete:
+
+
+project_orm.delete()
+
+Course.objects.filter(name__contains='Python').delete()
+
+
+
+
+
+
+
+########################################### Links ###########################################################
+Templates: https://www.youtube.com/watch?v=BuZX4qyJRlY&list=PL2bJNatYYfGTo-V4u4hMQW76ZulF77K_8&index=6
+
+
